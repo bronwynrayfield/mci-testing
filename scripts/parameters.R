@@ -43,12 +43,12 @@ ALPHA_VALS <- 1 / DISPERSAL_DISTANCES
 RESISTANCE_HABITAT     <- 1    # habitat cells (value 2 in NLMR output)
 RESISTANCE_NON_HABITAT <- 100  # non-habitat cells (NA in NLMR output)
 
-# Fixed Omniscape parameters
-OMNISCAPE_MODE             <- "pairwise-direct"
-OMNISCAPE_NUM_SPOKES       <- 16
-OMNISCAPE_BLOCK_SIZE       <- 1
-OMNISCAPE_SOURCE_FROM_RES  <- "true"
-OMNISCAPE_SPOKE_AGGREGATION <- "mean"
+# Fixed Omniscape / MCI parameters
+MCI_MODE              <- "pairwise-direct"
+MCI_NUM_SPOKES        <- 16
+MCI_BLOCK_SIZE        <- 1
+MCI_SOURCE_FROM_RES   <- "true"
+MCI_SPOKE_AGGREGATION <- "mean"
 
 
 # ---- Paths ----------
