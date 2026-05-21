@@ -1,0 +1,37 @@
+################################################################
+## .gitignore
+## Files and directories excluded from version control.
+## Large data files and reproducible outputs are not tracked.
+################################################################
+
+# ---- R ----------
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# ---- Julia ----------
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+Manifest.toml
+
+# ---- Large data files ----------
+# Rasters (landscapes, resistance, omniscape output)
+landscapes/
+results/binary/omniscape-output/
+results/non-binary/omniscape-output/
+
+# ---- Reproducible outputs ----------
+# CSVs and figures can be regenerated from scripts
+results/**/*.csv
+results/**/*.png
+
+# ---- OS files ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Temp files ----------
+*.tmp
+*.log
