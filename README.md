@@ -1,3 +1,4 @@
+```
 mci-testing/
 ├── landscapes/
 │   ├── binary/
@@ -29,3 +30,4 @@ mci-testing/
 │   │   └── 06-plot-SI-fig6.R
 │   └── non-binary/                    
 └── README.md
+```
