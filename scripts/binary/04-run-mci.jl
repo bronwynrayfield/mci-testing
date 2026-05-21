@@ -28,7 +28,7 @@ mkpath(OUTPUT_DIR)
 mkpath(dirname(LOG_PATH))
 
 # ---- MCI parameters ----------
-RADII           = [7]
+RADII           = [1, 10, 50, 150, 355]
 MODE            = "pairwise-direct"
 NUM_SPOKES      = 16
 BLOCK_SIZE      = 1
