@@ -35,3 +35,4 @@ desktop.ini
 # ---- Temp files ----------
 *.tmp
 *.log
+.positai
