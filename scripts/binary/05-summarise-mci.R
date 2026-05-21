@@ -68,4 +68,3 @@ results_combined <- results %>%
 
 # ---- Save ----------
 write.csv(results_combined, CSV_PATH, row.names = FALSE)
-cat(sprintf("Saved updated results to: %s\n", CSV_PATH))
