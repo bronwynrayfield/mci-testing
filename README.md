@@ -23,9 +23,9 @@ mci-testing/
 │   │   └── plot-functions.R
 │   ├── binary/
 │   │   ├── 01-simulate-landscapes.R
-│   │   ├── 02-compute-connectivity.R
+│   │   ├── 02-compute-reference-connectivity.R
 │   │   ├── 03-convert-to-resistance.R
-│   │   ├── 04-run-omniscape.jl
+│   │   ├── 04-run-mci.jl
 │   │   ├── 05-summarise-mci.R
 │   │   └── 06-plot-SI-fig6.R
 │   └── non-binary/                    
