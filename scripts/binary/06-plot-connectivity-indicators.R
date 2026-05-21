@@ -157,4 +157,3 @@ fig_si6 <- (
 
 # ---- Save ----------
 ggsave(FIG_PATH, fig_si6, width = 20, height = 10, dpi = 300)
-cat(sprintf("Figure saved to: %s\n", FIG_PATH))
