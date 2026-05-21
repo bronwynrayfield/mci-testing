@@ -66,7 +66,7 @@ RESISTANCE_DIR <- file.path(LANDSCAPES_DIR, "resistance-tif")
 OMNISCAPE_DIR  <- file.path(RESULTS_DIR, "omniscape-output")
 FIGURES_DIR    <- file.path(RESULTS_DIR, "figures")
 CSV_PATH       <- file.path(RESULTS_DIR, "connectivity.csv")
-FIG_PATH       <- file.path(FIGURES_DIR, "Oehri_SI_Fig6_reproduce.png")
+FIG_PATH       <- file.path(FIGURES_DIR, "connectivity-indicators.png")
 
 
 # ---- Plotting ----------
