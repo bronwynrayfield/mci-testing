@@ -59,7 +59,7 @@ LANDSCAPES_DIR <- file.path("landscapes", LANDSCAPE_TYPE)
 RESULTS_DIR    <- file.path("results", LANDSCAPE_TYPE)
 
 # Landscape inputs
-GEOTIFF_DIR    <- file.path(LANDSCAPES_DIR, "simulated-landscapes-tif")
+NLMR_DIR    <- file.path(LANDSCAPES_DIR, "simulated-landscapes-tif")
 RESISTANCE_DIR <- file.path(LANDSCAPES_DIR, "resistance-tif")
 
 # Results outputs

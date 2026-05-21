@@ -15,9 +15,6 @@ source("scripts/parameters.R")
 library(NLMR)
 library(terra)
 
-# ---- Create output directory ----------
-dir.create(GEOTIFF_DIR, recursive = TRUE, showWarnings = FALSE)
-
 # ---- Simulate landscapes ----------
 total_landscapes <- length(HAB_AMOUNTS) * length(CLUMPING_VALS) * N_REP
 counter          <- 0
@@ -38,7 +35,7 @@ gen_time <- system.time({
         }
 
         key      <- sprintf("clump%.1f_hab%.1f_rep%d", p, Ai, rep)
-        out_path <- file.path(GEOTIFF_DIR, paste0(key, ".tif"))
+        out_path <- file.path(NLMR_DIR, paste0(key, ".tif"))
 
         # Simulate landscape using random-cluster algorithm
         # NLMR returns 1 (non-habitat) and 2 (habitat)
@@ -67,7 +64,7 @@ cat(sprintf("\nSimulation complete in %.1f seconds (%.1f min).\n",
 
 # Spot check one landscape
 test_key <- sprintf("clump%.1f_hab%.1f_rep%d", CLUMPING_VALS[1], HAB_AMOUNTS[1], 1)
-test_r   <- terra::rast(file.path(GEOTIFF_DIR, paste0(test_key, ".tif")))
+test_r   <- terra::rast(file.path(NLMR_DIR, paste0(test_key, ".tif")))
 
 cat(sprintf("\nSpot check (%s):\n", test_key))
 cat(sprintf("  Dimensions: %d x %d cells\n", nrow(test_r), ncol(test_r)))
