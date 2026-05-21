@@ -12,7 +12,7 @@
 ##   ECAAp      ECA as fraction of total habitat area
 ##   mean_ND    mean node degree
 ##
-## Called by: scripts/binary/02-compute-connectivity.R
+## Called by: scripts/binary/02-compute-reference-connectivity.R
 ################################################################
 
 compute_connectivity <- function(hab_raster, alpha, min_patch_area = 1) {
