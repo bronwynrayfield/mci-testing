@@ -10,24 +10,22 @@ mci-testing/
 ├── results/
 │   ├── binary/
 │   │   ├── omniscape-output/
-│   │   ├── connectivity.csv
+│   │   ├── connectivity-reference-indicators.csv
+│   │   ├── connectivity-with-mci.csv
 │   │   └── figures/
 │   └── non-binary/                    
-│       ├── omniscape-output/
-│       ├── connectivity.csv
-│       └── figures/
 ├── scripts/
 │   ├── parameters.R
 │   ├── functions/
-│   │   ├── compute-connectivity.R
-│   │   └── plot-functions.R
+│   │   └──compute-connectivity.R
 │   ├── binary/
 │   │   ├── 01-simulate-landscapes.R
 │   │   ├── 02-compute-reference-connectivity.R
 │   │   ├── 03-convert-to-resistance.R
 │   │   ├── 04-run-mci.jl
+│   │   ├── 04-run-mci.ps1
 │   │   ├── 05-summarise-mci.R
-│   │   └── 06-plot-SI-fig6.R
+│   │   └── 06-plot-connectivity-indicators.R
 │   └── non-binary/                    
 └── README.md
 ```
