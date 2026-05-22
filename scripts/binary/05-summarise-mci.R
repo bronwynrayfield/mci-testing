@@ -5,10 +5,8 @@
 ##
 ## Inputs:  scripts/parameters.R
 ##          results/binary/omniscape-output/*.tif
-##          results/binary/connectivity.csv
-## Outputs: results/binary/connectivity.csv (updated with MCI columns)
-##
-## Run once after 04-run-mci.jl is complete.
+##          results/binary/connectivity-reference-indicators.csv
+## Outputs: results/binary/connectivity-with-mci.csv
 ################################################################
 
 # ---- Source parameters ----------
@@ -19,7 +17,7 @@ library(terra)
 library(dplyr)
 
 # ---- Load existing connectivity results ----------
-results <- read.csv(CSV_PATH)
+results <- read.csv(REFERENCE_CSV_PATH)
 
 # ---- Get MCI rasters ----------
 tif_files <- list.files(OMNISCAPE_DIR, pattern = "\\.tif$", full.names = TRUE)
@@ -67,4 +65,4 @@ results_combined <- results %>%
   left_join(mci_summary, by = c("hab_amount", "clumping", "rep", "alpha_label"))
 
 # ---- Save ----------
-write.csv(results_combined, CSV_PATH, row.names = FALSE)
+write.csv(results_combined, MCI_CSV_PATH, row.names = FALSE)

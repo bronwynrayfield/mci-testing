@@ -65,7 +65,10 @@ RESISTANCE_DIR <- file.path(LANDSCAPES_DIR, "resistance-tif")
 # Results outputs
 OMNISCAPE_DIR  <- file.path(RESULTS_DIR, "omniscape-output")
 FIGURES_DIR    <- file.path(RESULTS_DIR, "figures")
-CSV_PATH       <- file.path(RESULTS_DIR, "connectivity.csv")
+# Reference connectivity indicators (MPC, ECA, ECAAp, ND)
+REFERENCE_CSV_PATH <- file.path(RESULTS_DIR, "connectivity-reference-indicators.csv")
+# Full results including MCI
+MCI_CSV_PATH       <- file.path(RESULTS_DIR, "connectivity-with-mci.csv")
 FIG_PATH       <- file.path(FIGURES_DIR, "connectivity-indicators.png")
 
 

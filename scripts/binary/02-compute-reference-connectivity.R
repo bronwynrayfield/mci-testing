@@ -6,7 +6,7 @@
 ## Inputs:  scripts/parameters.R
 ##          scripts/functions/compute-connectivity.R
 ##          landscapes/binary/simulated-landscapes-tif/*.tif
-## Outputs: results/binary/connectivity.csv
+## Outputs: results/binary/connectivity-reference-indicators.csv
 ################################################################
 
 # ---- Source parameters and functions ----------
@@ -81,10 +81,10 @@ cat(sprintf("Connectivity analysis complete in %.1f seconds (%.1f min).\n",
             conn_time["elapsed"], conn_time["elapsed"] / 60))
 
 # ---- Save results ----------
-if (APPEND_RESULTS && file.exists(CSV_PATH)) {
-  results_existing <- read.csv(CSV_PATH)
+if (APPEND_RESULTS && file.exists(REFERENCE_CSV_PATH)) {
+  results_existing <- read.csv(REFERENCE_CSV_PATH)
   results_combined <- dplyr::bind_rows(results_existing, results_df)
-  write.csv(results_combined, CSV_PATH, row.names = FALSE)
+  write.csv(results_combined, REFERENCE_CSV_PATH, row.names = FALSE)
 } else {
-  write.csv(results_df, CSV_PATH, row.names = FALSE)
+  write.csv(results_df, REFERENCE_CSV_PATH, row.names = FALSE)
 }
