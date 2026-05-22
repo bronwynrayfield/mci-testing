@@ -55,8 +55,7 @@ for (f in tif_files) {
     clumping    = clumping,
     rep         = rep,
     alpha_label = alpha_label,
-    MCI_mean    = mean(vals),
-    MCI_sum     = sum(vals)
+    MCI_mean    = mean(vals)
   ))
 }
 
