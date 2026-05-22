@@ -4,7 +4,7 @@
 ## (SI Fig. 6 style from Oehri et al. 2024), including MCI.
 ##
 ## Inputs:  scripts/parameters.R
-##          results/binary/connectivity.csv
+##          results/binary/connectivity-with-mci.csv
 ## Outputs: results/binary/figures/SI-Fig6-reconnect.png
 ################################################################
 
@@ -18,23 +18,19 @@ library(patchwork)
 library(npreg)
 
 # ---- Settings ----------
-# Set to a single dispersal distance to test, or NULL to plot all
-FILTER_DISP_DIST <- 6.8
+# Set to a subset of dispersal distances to test, or NULL to plot all
+FILTER_DISP_DIST <- NULL #c(1, 6.8, 10)
 
 # ---- Load results ----------
-results <- read.csv(CSV_PATH) %>%
+results <- read.csv(MCI_CSV_PATH) %>%
   # Convert alpha_label to dispersal distance for plotting
   mutate(disp_dist = round(1 / alpha, 1))
 
 # Filter to single dispersal distance if set
 if (!is.null(FILTER_DISP_DIST)) {
   results <- results %>%
-    filter(disp_dist == FILTER_DISP_DIST)
+    filter(disp_dist %in% FILTER_DISP_DIST)
 }
-
-cat(sprintf("Plotting %d rows | dispersal distances: %s\n",
-            nrow(results),
-            paste(unique(results$disp_dist), collapse = ", ")))
 
 # ---- Data transformations ----------
 # 1 cell = 1 m², 10000 cells = 1 ha
@@ -78,13 +74,13 @@ fit_spline <- function(df, x_var, y_var) {
 
 # ---- Panel function ----------
 make_panel <- function(df, x_var, y_var, x_lab, y_lab) {
-
+  
   p <- ggplot(df, aes_string(x = x_var, y = y_var)) +
     geom_point(alpha = 0.2, size = 0.6, colour = "grey60") +
     theme_classic(base_size = 10) +
     theme(aspect.ratio = 2) +
     labs(x = x_lab, y = y_lab)
-
+  
   # Clip axes without removing data
   if (x_var == "n_patches" && y_var == "mean_ND") {
     p <- p + coord_cartesian(xlim = c(0, 1200), ylim = c(0, 1200))
@@ -95,12 +91,13 @@ make_panel <- function(df, x_var, y_var, x_lab, y_lab) {
   } else if (x_var == "hab_area_ha") {
     p <- p + coord_cartesian(xlim = c(0, 6))
   }
-
+  
   # Add one spline per dispersal distance
   for (dd in disp_dists_present) {
     sub_df    <- df[df$disp_dist == dd, ]
     spline_df <- fit_spline(sub_df, x_var, y_var)
     if (!is.null(spline_df)) {
+      spline_df$disp_dist <- as.character(dd)
       p <- p +
         geom_ribbon(
           data        = spline_df,
@@ -111,13 +108,20 @@ make_panel <- function(df, x_var, y_var, x_lab, y_lab) {
         ) +
         geom_line(
           data        = spline_df,
-          aes(x = x, y = fit),
+          aes(x = x, y = fit, colour = disp_dist),
           inherit.aes = FALSE,
-          colour      = palette_cols[as.character(dd)],
           linewidth   = 0.9
         )
     }
   }
+  
+# Add legend — always show all dispersal distances for consistency
+  p <- p +
+    scale_colour_manual(
+      values = PALETTE_COLS,
+      name   = "Dispersal\ndistance (cells)",
+      breaks = as.character(sort(DISPERSAL_DISTANCES))
+    )  
   p
 }
 
@@ -139,11 +143,11 @@ for (yv in indicators) {
 # ---- Assemble figure ----------
 fig_si6 <- (
   panels[["MPC_hab_area_ha"]]      + panels[["ECA_hab_area_ha"]]      +
-  panels[["ECAAp_hab_area_ha"]]    + panels[["mean_ND_hab_area_ha"]]  +
-  panels[["MCI_mean_hab_area_ha"]] +
-  panels[["MPC_n_patches"]]        + panels[["ECA_n_patches"]]        +
-  panels[["ECAAp_n_patches"]]      + panels[["mean_ND_n_patches"]]    +
-  panels[["MCI_mean_n_patches"]]
+    panels[["ECAAp_hab_area_ha"]]    + panels[["mean_ND_hab_area_ha"]]  +
+    panels[["MCI_mean_hab_area_ha"]] +
+    panels[["MPC_n_patches"]]        + panels[["ECA_n_patches"]]        +
+    panels[["ECAAp_n_patches"]]      + panels[["mean_ND_n_patches"]]    +
+    panels[["MCI_mean_n_patches"]]
 ) +
   patchwork::plot_layout(ncol = 5, guides = "collect") +
   patchwork::plot_annotation(
@@ -151,8 +155,9 @@ fig_si6 <- (
     subtitle = sprintf(
       "%d habitat amount levels \u00d7 %d clumping levels \u00d7 %d reps | dispersal distance = %s cells",
       length(HAB_AMOUNTS), length(CLUMPING_VALS), N_REP,
-      paste(unique(results_plot$disp_dist), collapse = ", ")
-    )
+      paste(sort(unique(results_plot$disp_dist)), collapse = ", ")
+    ),
+    theme = theme(legend.position = "right")
   )
 
 # ---- Save ----------
