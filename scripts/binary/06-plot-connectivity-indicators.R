@@ -1,11 +1,11 @@
 ################################################################
-## 06-plot-SI-fig6.R
+## 06-plot-connectivity-indicators.R
 ## Plot connectivity indicators vs habitat amount and fragmentation
 ## (SI Fig. 6 style from Oehri et al. 2024), including MCI.
 ##
 ## Inputs:  scripts/parameters.R
 ##          results/binary/connectivity-with-mci.csv
-## Outputs: results/binary/figures/SI-Fig6-reconnect.png
+## Outputs: results/binary/figures/connectivity-indicators.png
 ################################################################
 
 # ---- Source parameters ----------
@@ -18,57 +18,66 @@ library(patchwork)
 library(npreg)
 
 # ---- Settings ----------
-# Set to a subset of dispersal distances to test, or NULL to plot all
-FILTER_DISP_DIST <- NULL #c(1, 6.8, 10)
+# Set to NULL to include all, or a vector to subset
+FILTER_DISP_DIST <- NULL
+FILTER_HAB       <- c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6)   # subset of HAB_AMOUNTS
+FILTER_CLUMPING  <- c(0.1, 0.2, 0.3, 0.4, 0.5)   # exclude clumping = 0.6
 
 # ---- Load results ----------
 results <- read.csv(MCI_CSV_PATH) %>%
-  # Convert alpha_label to dispersal distance for plotting
   mutate(disp_dist = round(1 / alpha, 1))
 
-# Filter to single dispersal distance if set
+# ---- Apply filters ----------
 if (!is.null(FILTER_DISP_DIST)) {
-  results <- results %>%
-    filter(disp_dist %in% FILTER_DISP_DIST)
+  results <- results %>% filter(disp_dist %in% FILTER_DISP_DIST)
+}
+if (!is.null(FILTER_HAB)) {
+  results <- results %>% filter(hab_amount %in% FILTER_HAB)
+}
+if (!is.null(FILTER_CLUMPING)) {
+  results <- results %>% filter(clumping %in% FILTER_CLUMPING)
 }
 
 # ---- Data transformations ----------
-# 1 cell = 1 m², 10000 cells = 1 ha
+# True habitat % from actual cell counts (not target hab_amount)
+# Inverse MCI so that higher = better connected (lower resistance)
 results_plot <- results %>%
-  mutate(hab_area_ha = hab_area / 10000)
+  mutate(
+    hab_pct      = (hab_area / (NCOL * NROW)) * 100,
+    MCI_mean_inv = 1 / MCI_mean
+  )
 
 # ---- Indicators and labels ----------
-indicators <- c("MPC", "ECA", "ECAAp", "mean_ND", "MCI_mean")
+indicators <- c("MPC", "ECA", "ECAAp", "mean_ND", "MCI_mean_inv")
 
 y_labs <- c(
-  MPC      = "MPC",
-  ECA      = "ECA",
-  ECAAp    = "ECAAp",
-  mean_ND  = "Average node degree",
-  MCI_mean = "MCI (mean)"
+  MPC          = "MPC",
+  ECA          = "ECA",
+  ECAAp        = "ECAAp",
+  mean_ND      = "Average node degree",
+  MCI_mean_inv = "1 / MCI (mean)"
 )
 
 x_labs <- c(
-  hab_area_ha = "Total habitat area (ha)",
-  n_patches   = "Number of patches"
+  hab_pct   = "Habitat cover (%)",
+  n_patches = "Number of patches"
 )
 
-x_vars <- c("hab_area_ha", "n_patches")
+x_vars <- c("hab_pct", "n_patches")
 
 # ---- Colour palette ----------
-# Keyed to dispersal distance
 disp_dists_present <- sort(unique(results_plot$disp_dist))
-palette_cols <- PALETTE_COLS[as.character(disp_dists_present)]
+palette_cols       <- PALETTE_COLS[as.character(disp_dists_present)]
 
 # ---- Smooth spline function ----------
 fit_spline <- function(df, x_var, y_var) {
   sub <- df[!is.na(df[[x_var]]) & !is.na(df[[y_var]]), ]
   if (nrow(sub) < 5) return(NULL)
-
-  fit    <- npreg::ss(sub[[x_var]], sub[[y_var]], df = 10)
+  
+  fit    <- npreg::ss(sub[[x_var]], sub[[y_var]], df = 5)
   x_pred <- seq(min(sub[[x_var]]), max(sub[[x_var]]), length.out = 200)
   pred   <- predict(fit, x = x_pred)
-
+  
   data.frame(x = x_pred, fit = pred$y, se = pred$se)
 }
 
@@ -86,10 +95,10 @@ make_panel <- function(df, x_var, y_var, x_lab, y_lab) {
     p <- p + coord_cartesian(xlim = c(0, 1200), ylim = c(0, 1200))
   } else if (x_var == "n_patches") {
     p <- p + coord_cartesian(xlim = c(0, 1200))
-  } else if (x_var == "hab_area_ha" && y_var == "mean_ND") {
-    p <- p + coord_cartesian(xlim = c(0, 6), ylim = c(0, 1200))
-  } else if (x_var == "hab_area_ha") {
-    p <- p + coord_cartesian(xlim = c(0, 6))
+  } else if (x_var == "hab_pct" && y_var == "mean_ND") {
+    p <- p + coord_cartesian(xlim = c(0, 75), ylim = c(0, 1200))
+  } else if (x_var == "hab_pct") {
+    p <- p + coord_cartesian(xlim = c(0, 75))
   }
   
   # Add one spline per dispersal distance
@@ -115,13 +124,14 @@ make_panel <- function(df, x_var, y_var, x_lab, y_lab) {
     }
   }
   
-# Add legend — always show all dispersal distances for consistency
+  # Add legend
   p <- p +
     scale_colour_manual(
       values = PALETTE_COLS,
       name   = "Dispersal\ndistance (cells)",
       breaks = as.character(sort(DISPERSAL_DISTANCES))
-    )  
+    )
+  
   p
 }
 
@@ -142,19 +152,19 @@ for (yv in indicators) {
 
 # ---- Assemble figure ----------
 fig_si6 <- (
-  panels[["MPC_hab_area_ha"]]      + panels[["ECA_hab_area_ha"]]      +
-    panels[["ECAAp_hab_area_ha"]]    + panels[["mean_ND_hab_area_ha"]]  +
-    panels[["MCI_mean_hab_area_ha"]] +
-    panels[["MPC_n_patches"]]        + panels[["ECA_n_patches"]]        +
-    panels[["ECAAp_n_patches"]]      + panels[["mean_ND_n_patches"]]    +
-    panels[["MCI_mean_n_patches"]]
+  panels[["MPC_hab_pct"]]           + panels[["ECA_hab_pct"]]           +
+    panels[["ECAAp_hab_pct"]]         + panels[["mean_ND_hab_pct"]]       +
+    panels[["MCI_mean_inv_hab_pct"]]  +
+    panels[["MPC_n_patches"]]         + panels[["ECA_n_patches"]]         +
+    panels[["ECAAp_n_patches"]]       + panels[["mean_ND_n_patches"]]     +
+    panels[["MCI_mean_inv_n_patches"]]
 ) +
   patchwork::plot_layout(ncol = 5, guides = "collect") +
   patchwork::plot_annotation(
     title    = "Oehri et al. 2024: Connectivity indicators vs habitat amount and fragmentation",
     subtitle = sprintf(
       "%d habitat amount levels \u00d7 %d clumping levels \u00d7 %d reps | dispersal distance = %s cells",
-      length(HAB_AMOUNTS), length(CLUMPING_VALS), N_REP,
+      length(FILTER_HAB), length(FILTER_CLUMPING), N_REP,
       paste(sort(unique(results_plot$disp_dist)), collapse = ", ")
     ),
     theme = theme(legend.position = "right")
