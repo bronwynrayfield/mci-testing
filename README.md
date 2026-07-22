@@ -5,8 +5,8 @@ to habitat amount and configuration, using simulated landscapes generated with
 [NLMR](https://github.com/ropensci/NLMR), following the modified random clusters
 method of Saura & Martínez-Millán (2000). The workflow builds a set of binary landscape scenarios (non-binary
 scenarios forthcoming), computes a suite of established connectivity metrics as a
-reference baseline, and extends that comparison to an additional resistance-surface-
-based indicator computed in Julia. Results are summarised and visualised across a
+reference baseline, and extends that comparison to a novel resistance-surface-based
+indicator computed in Julia. Results are summarised and visualised across a
 gradient of habitat amount, patch clumping, and dispersal distance.
 
 This project builds on and extends the simulation and evaluation framework from:
