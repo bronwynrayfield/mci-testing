@@ -73,5 +73,3 @@ FIG_HEIGHT <- 6.8
 
 ggsave(hab_out, p_hab, width = FIG_WIDTH, height = FIG_HEIGHT, dpi = 300)
 ggsave(mci_out, p_mci, width = FIG_WIDTH, height = FIG_HEIGHT, dpi = 300)
-
-cat(sprintf("Saved:\n  %s\n  %s\n", hab_out, mci_out))

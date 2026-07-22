@@ -98,5 +98,3 @@ p_chart <- ggplot(curves, aes(x = x, y = y, colour = disp_dist_lab)) +
 # ---- Save ----------
 out_path <- file.path(FIGURES_DIR, "website-chart.png")
 ggsave(out_path, p_chart, width = 8.5, height = 6, dpi = 300, bg = BG_COL)
-
-cat(sprintf("Saved %s\n", out_path))

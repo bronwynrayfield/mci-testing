@@ -84,6 +84,3 @@ fig_candidates <- patchwork::wrap_plots(panels, ncol = 2) +
 # ---- Save ----------
 out_path <- file.path(FIGURES_DIR, "mci-illustration-candidates.png")
 ggsave(out_path, fig_candidates, width = 8, height = 3.2 * nrow(candidates), dpi = 300, limitsize = FALSE)
-
-cat(sprintf("Saved %d candidate pairs to %s\n", nrow(candidates), out_path))
-cat("Pick the pair with the clearest gap-vs-corridor contrast for the slide.\n")
