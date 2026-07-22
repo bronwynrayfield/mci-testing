@@ -40,22 +40,20 @@ if (!is.null(FILTER_CLUMPING)) {
 
 # ---- Data transformations ----------
 # True habitat % from actual cell counts (not target hab_amount)
-# Inverse MCI so that higher = better connected (lower resistance)
 results_plot <- results %>%
   mutate(
-    hab_pct      = (hab_area / (NCOL * NROW)) * 100,
-    MCI_mean_inv = 1 / MCI_mean
+    hab_pct      = (hab_area / (NCOL * NROW)) * 100
   )
 
 # ---- Indicators and labels ----------
-indicators <- c("MPC", "ECA", "ECAAp", "mean_ND", "MCI_mean_inv")
+indicators <- c("MPC", "ECA", "ECAAp", "mean_ND", "MCI_mean")
 
 y_labs <- c(
   MPC          = "MPC",
   ECA          = "ECA",
   ECAAp        = "ECAAp",
   mean_ND      = "Average node degree",
-  MCI_mean_inv = "1 / MCI (mean)"
+  MCI_mean     = "MCI (mean)"
 )
 
 x_labs <- c(
@@ -154,10 +152,10 @@ for (yv in indicators) {
 fig_si6 <- (
   panels[["MPC_hab_pct"]]           + panels[["ECA_hab_pct"]]           +
     panels[["ECAAp_hab_pct"]]         + panels[["mean_ND_hab_pct"]]       +
-    panels[["MCI_mean_inv_hab_pct"]]  +
+    panels[["MCI_mean_hab_pct"]]  +
     panels[["MPC_n_patches"]]         + panels[["ECA_n_patches"]]         +
     panels[["ECAAp_n_patches"]]       + panels[["mean_ND_n_patches"]]     +
-    panels[["MCI_mean_inv_n_patches"]]
+    panels[["MCI_mean_n_patches"]]
 ) +
   patchwork::plot_layout(ncol = 5, guides = "collect") +
   patchwork::plot_annotation(
