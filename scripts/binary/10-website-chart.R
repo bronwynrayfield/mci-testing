@@ -1,7 +1,9 @@
 ################################################################
-## 10-website-chart.R
-## Editorial-style chart for my website: ECAAp vs number of
+## 11-website-chart.R
+## Editorial-style chart for the website: ECAAp vs number of
 ## protected areas, one smoothed curve per dispersal distance.
+## Styled with soft, earthy tones to match the site rather than
+## a typical scientific figure.
 ##
 ## Inputs:  scripts/parameters.R
 ##          results/binary/connectivity-reference-indicators.csv
@@ -21,11 +23,10 @@ FILTER_HAB      <- 0.2                 # matches the map figures
 FILTER_CLUMPING <- CLUMPING_VALS       # all clumping levels -> more points
 DISP_KEEP       <- c(1, 10, 50, 150, 355)
 
-BG_COL <- "#f7f5f0"
+BG_COL <- "transparent"
 
-# Soft earthy palette, ordered short -> long dispersal distance
 EARTHY_COLS <- setNames(
-  c("#3D5A50", "#7A9E7E", "#C9B896", "#8CA3B8", "#5C7A96"),
+  c("#1F4A32", "#3F9159", "#C9702E", "#1E6E8C", "#16456B"),
   as.character(DISP_KEEP)
 )
 
@@ -49,19 +50,22 @@ results <- read.csv(REFERENCE_CSV_PATH) %>%
     )
   )
 
-# ---- Fit a smooth curve per dispersal distance ----------
+# ---- Fit a smooth curve (with SE) per dispersal distance ----------
 fit_spline <- function(df) {
   sub <- df[!is.na(df$n_patches) & !is.na(df$ECAAp), ]
   if (nrow(sub) < 5) return(NULL)
   fit    <- npreg::ss(sub$n_patches, sub$ECAAp, df = 5)
   x_pred <- seq(min(sub$n_patches), max(sub$n_patches), length.out = 200)
-  pred   <- predict(fit, x = x_pred)
-  data.frame(x = x_pred, y = pred$y)
+  pred   <- predict(fit, x = x_pred, se.fit = TRUE)
+  se     <- if (!is.null(pred$se.fit)) pred$se.fit else if (!is.null(pred$se)) pred$se else NA_real_
+  data.frame(x = x_pred, y = pred$y, se = se)
 }
 
 curve_list <- lapply(split(results, results$disp_dist_lab), fit_spline)
 curves <- dplyr::bind_rows(curve_list, .id = "disp_dist_lab")
 curves$disp_dist_lab <- factor(curves$disp_dist_lab, levels = levels(results$disp_dist_lab))
+curves$ymin <- pmax(curves$y - 1.96 * curves$se, 0)
+curves$ymax <- pmin(curves$y + 1.96 * curves$se, 1)
 
 # ---- End-of-line labels (replace legend) ----------
 label_df <- curves %>%
@@ -71,6 +75,10 @@ label_df <- curves %>%
 
 # ---- Chart ----------
 p_chart <- ggplot(curves, aes(x = x, y = y, colour = disp_dist_lab)) +
+  geom_ribbon(
+    aes(ymin = ymin, ymax = ymax, fill = disp_dist_lab),
+    colour = NA, alpha = 0.15
+  ) +
   geom_line(linewidth = 1.6, lineend = "round") +
   geom_text(
     data = label_df,
@@ -78,9 +86,10 @@ p_chart <- ggplot(curves, aes(x = x, y = y, colour = disp_dist_lab)) +
     hjust = -0.15, size = 4.2, fontface = "bold", family = "sans"
   ) +
   scale_colour_manual(values = palette_named, guide = "none") +
-  scale_x_continuous(expand = expansion(mult = c(0.02, 0.16))) +
+  scale_fill_manual(values = palette_named, guide = "none") +
+  scale_x_continuous(limits = c(NA, 1500), expand = expansion(mult = c(0.02, 0.05))) +
   scale_y_continuous(limits = c(0, 1), expand = expansion(mult = 0.03)) +
-  labs(x = "Increasing fragmentation", y = "Connectivity") +
+  labs(x = "Increasing fragmentation", y = "Increasing connectivity") +
   theme_minimal(base_size = 15) +
   theme(
     plot.background   = element_rect(fill = BG_COL, colour = NA),
@@ -88,7 +97,7 @@ p_chart <- ggplot(curves, aes(x = x, y = y, colour = disp_dist_lab)) +
     panel.grid        = element_blank(),
     axis.line         = element_line(colour = "#8a8378", linewidth = 0.4),
     axis.ticks        = element_blank(),
-    axis.text         = element_text(colour = "#8a8378", size = 11),
+    axis.text         = element_blank(),
     axis.title        = element_text(colour = "#6b6459", size = 13),
     axis.title.x      = element_text(margin = margin(t = 10)),
     axis.title.y      = element_text(margin = margin(r = 10)),
@@ -97,4 +106,4 @@ p_chart <- ggplot(curves, aes(x = x, y = y, colour = disp_dist_lab)) +
 
 # ---- Save ----------
 out_path <- file.path(FIGURES_DIR, "website-chart.png")
-ggsave(out_path, p_chart, width = 8.5, height = 6, dpi = 300, bg = BG_COL)
+ggsave(out_path, p_chart, width = 8.5, height = 6, dpi = 300, bg = "transparent")

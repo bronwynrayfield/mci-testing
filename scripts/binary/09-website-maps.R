@@ -1,6 +1,6 @@
 ################################################################
-## 09-website-maps.R
-## Render selected simulated landscapes as individual,
+## 10-website-maps.R
+## Render the selected simulated landscapes as individual,
 ## identically-sized figures for use in an external layout
 ## (e.g. PowerPoint).
 ##
@@ -18,6 +18,8 @@ source("scripts/parameters.R")
 library(terra)
 library(ggplot2)
 library(purrr)
+library(magick)
+library(grid)
 
 # ---- Selected landscapes ----------
 selected <- tibble::tibble(
@@ -27,9 +29,34 @@ selected <- tibble::tibble(
 )
 
 # ---- Fixed output size (identical across all maps) ----------
-FIG_SIZE <- 5   # inches, square
-BG_COL   <- "#f7f5f0"
-HAB_COL  <- "#2c7a3f"
+FIG_SIZE      <- 5   # inches, square
+BG_COL        <- "white"
+HAB_COL       <- "#2c7a3f"
+CORNER_RADIUS <- 0.08   # fraction of tile size; increase for more rounding
+
+# ---- Rounded-corner clip (post-process, since ggplot can't clip a raster to a shape) ----------
+# Build a mask that is a genuinely transparent image (alpha=0) outside a rounded
+# rectangle and opaque (alpha=1) inside it, then use "DstIn" to multiply that
+# mask's alpha into the existing image's alpha -- this composites two real
+# alpha channels together natively, rather than hand-extracting/inverting
+# grayscale channels (which is ambiguous across ImageMagick versions and was
+# causing the fill to invert).
+round_corners <- function(path, radius_frac = CORNER_RADIUS) {
+  img  <- magick::image_read(path)
+  info <- magick::image_info(img)
+  w <- info$width; h <- info$height
+  
+  mask <- magick::image_graph(width = w, height = h, bg = "transparent")
+  grid::grid.roundrect(
+    width = unit(1, "npc"), height = unit(1, "npc"),
+    r = unit(radius_frac, "npc"),
+    gp = gpar(fill = "white", col = NA)
+  )
+  dev.off()
+  
+  out <- magick::image_composite(img, mask, operator = "DstIn")
+  magick::image_write(out, path)
+}
 
 # ---- Map function ----------
 make_map <- function(clumping, rep, hab_amount) {
@@ -51,8 +78,8 @@ make_map <- function(clumping, rep, hab_amount) {
     )
   
   out_path <- file.path(FIGURES_DIR, sprintf("website-map-clump%.1f.png", clumping))
-  ggsave(out_path, p, width = FIG_SIZE, height = FIG_SIZE, dpi = 300)
-  cat(sprintf("Saved %s\n", out_path))
+  ggsave(out_path, p, width = FIG_SIZE, height = FIG_SIZE, dpi = 300, bg = "white")
+  round_corners(out_path)
   out_path
 }
 
